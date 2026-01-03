@@ -1,0 +1,157 @@
+/* 引入水墨书法风格字体（Ma Shan Zheng） */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap');
+body { font-family: Arial, sans-serif; margin: 20px; }
+    #main { display: flex; gap: 16px; align-items: flex-start; }
+    #left { flex: 1; }
+    #sidebar { width: 590px; max-width: 50%; }
+    .sidebar-section { background: #fff; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px; }
+    /* 更紧凑的控制按钮区样式 */
+    .control-bar { padding: 6px 8px; gap: 8px; }
+    .control-bar button { padding: 6px 10px; font-size: 14px; }
+    .control-bar span { font-size: 12px; }
+    .control-bar .switch { width: 36px; height: 18px; }
+    .control-bar .slider:before { height: 12px; width: 12px; left: 3px; bottom: 3px; }
+    .control-bar input:checked + .slider:before { transform: translateX(16px); }
+    .sidebar-section h3 { margin: 4px 0 8px 0; font-size: 14px; }
+    /* 行棋指示圆环 + 2x2 文本网格样式 */
+    .turn-badge { width: 112px; height: 112px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: #fff; }
+    .turn-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); width: 72%; height: 72%; text-align: center; align-items: center; justify-items: center; font-weight: 700; font-size: 28px; line-height: 1; font-family: 'Ma Shan Zheng', 'STXingkai', 'KaiTi', serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+    /* 墨迹 / 手写效果：轻微模糊与多层阴影模拟毛笔痕迹 */
+    .turn-grid div { display:flex; align-items:center; justify-content:center; width:100%; height:100%; text-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.06); }
+    .move-item { padding: 6px; border-bottom: 1px dashed #eee; display:flex; justify-content:space-between; align-items:center; cursor: pointer; }
+    /* 坐标标签样式：左侧数字、底部字母 */
+    #coordLeft { position: absolute; left: -44px; top: 0; width: 40px; height: 100%; pointer-events: none; }
+    .coord-left-label { position: absolute; left: 0; width: 40px; text-align: right; padding-right: 6px; font-size: 12px; color: #333; transform: translateY(-50%); }
+    #coordBottom { position: absolute; left: 0; top: 100%; height: 28px; width: 100%; pointer-events: none; }
+    .coord-bottom-label { position: absolute; top: 0; font-size: 12px; color: #333; transform: translateX(-50%); }
+    .cell.highlight { box-shadow: 0 0 0 4px rgba(0,128,255,0.45); z-index: 20; }
+    .pv-mark { position: absolute; width: 90%; height: 90%; left:50%; top:50%; transform: translate(-50%, -50%); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 10px; z-index: 15; pointer-events: none; box-sizing: border-box; }
+    .pv-mark.black { background: rgba(0,0,0,0.65); color: #fff; border: 1px solid rgba(255,255,255,0.08); }
+    .pv-mark.white { background: rgba(255,255,255,0.76); color: #000; border: 1px dashed rgba(0,0,0,0.6); }
+    .move-stats { font-size: 12px; color: #333; }
+        :root { --cell-size: 30px; --grid-gap: 1px; }
+        #board {
+    display: grid;
+    grid-template-columns: repeat(19, var(--cell-size));
+    column-gap: 1px; /* 竖向列间距固定为 1px */
+    row-gap: var(--grid-gap);
+    margin-bottom: 10px;
+    background: #B58863;
+    padding: 10px;
+    border-radius: 4px;
+        position: relative;
+        width: fit-content;
+  }
+    #boardOverlay { position: absolute; inset: 0; width:100%; height:100%; pointer-events:none; overflow:visible }
+    .pv-line { stroke: rgba(0,128,255,0.85); stroke-width: 2; fill: none; }
+    .pv-arrow { stroke: rgba(0,128,255,0.95); fill: rgba(0,128,255,0.95); }
+  .cell {
+    width: 30px;
+    height: 30px;
+    background: #F0D9B5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+    .black, .white {
+        border-radius: 50%;
+        width: 90%;
+        height: 90%;
+    }
+    .black { background: black; }
+        .white { background: white; box-shadow: inset 0 0 2px rgba(0,0,0,0.5); box-sizing: border-box; }
+    .hint {
+    position: absolute;
+    box-sizing: border-box;
+    border-radius: 50%;
+    /* 半透明填充 + 虚线圆周 */
+    background: rgba(255, 165, 0, 0.28);
+    border: 2px dashed rgba(255,165,0,0.9);
+    width: 90%;
+    height: 90%;
+    left: 5%;
+    top: 5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,0.9);
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none; /* 👈 关键！让鼠标穿透 */
+}
+  /* 滑动开关容器 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 22px;
+}
+
+/* 隐藏默认复选框 */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* 滑块轨道 */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 22px;
+}
+
+/* 滑块的小圆点 */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* 选中状态的背景色 */
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+#agent-output {
+    white-space: pre-wrap; 
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+}
+#agent-output b { color: #d9534f; } /* 强调坐标 */
+/* 选中时圆点的位移 */
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+  #evaluation {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  button {
+    padding: 8px 16px;
+    font-size: 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover { background: #45a049; }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>智能体应用调用测试</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    textarea { width: 100%; height: 120px; margin-bottom: 10px; }
+    button { padding: 8px 16px; }
+    #output { white-space: pre-wrap; margin-top: 20px; border: 1px solid #ccc; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <h2>智能体应用调用测试</h2>
+
+  <textarea id="promptInput" placeholder="在这里输入你想发送给智能体的问题或指令"></textarea>
+  <br>
+  <button id="sendBtn">发送请求</button>
+
+  <div id="output"></div>
+
+  <script>
+    const appId = 'b0a92ead844a47b5a02c2a6fc199f772'; // 替换为你的智能体应用 ID
+    const apiKey = 'sk-3e41cb3371e146fc9154489be58b9d6c'; // 替换成你的 DashScope API Key
+
+    document.getElementById('sendBtn').onclick = async () => {
+      const prompt = document.getElementById('promptInput').value.trim();
+      if (!prompt) {
+        alert('请输入提示词再发送');
+        return;
+      }
+
+      document.getElementById('output').textContent = "正在发送请求...";
+
+      try {
+        const url = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            input: { prompt: prompt },
+            parameters: {},
+            debug: {}
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          document.getElementById('output').textContent = 
+            `请求失败: HTTP ${response.status}\n${errorText}`;
+          return;
+        }
+
+        const data = await response.json();
+        // 输出部分结果
+        const text = data.output && data.output.text ? data.output.text : JSON.stringify(data);
+        document.getElementById('output').textContent = `模型返回:\n${text}`;
+
+      } catch (err) {
+        document.getElementById('output').textContent = `请求异常:\n${err.message}`;
+      }
+    };
+  </script>
+
+</body>
+</html>

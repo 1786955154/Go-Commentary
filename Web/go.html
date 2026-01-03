@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="go.css">
+
+<meta charset="UTF-8">
+<title>棋士馆</title>
+
+</head>
+<body>
+
+<div id="main">
+    <div id="left">
+            <!-- 控制按钮区（已移动到棋盘上方） -->
+            <div class="sidebar-section control-bar" style="display:flex; gap:12px; justify-content:flex-start; align-items:center; margin-bottom:8px;">
+                
+            
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 13px; color: #555;">自动分析</span>
+                    <label class="switch">
+                        <input type="checkbox" id="autoAnalyzeToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <button id="analyzeBtn">单步局势分析与推荐</button>
+                <button id="undoBtn" style="background: #888;">悔棋</button>
+                <button id="toggleTimerBtn" style="background: #007bff;">开始计时</button>
+            </div>
+
+            <div id="boardWrapper" style="position:relative">
+                <div id="board"></div>
+                <svg id="boardOverlay" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            </div>
+    </div>
+   <div id="sidebar">
+        <!-- 新增：用户信息与计时器区域（优化版） -->
+        <div id="player-info" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #e6f7f0; border-radius: 4px; margin-bottom: 12px;">
+            <!-- 左侧：黑方 -->
+            <div style="text-align: center;">
+                <img src="picture.jpg" alt="黑方" style="width: 40px; height: 40px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 500; margin-top: 4px;">大师傅萨芬</div>
+                <div style="font-size: 12px; color: #666;">18级</div>
+                <div id="black-time" style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; font-size: 14px; font-weight: bold; margin-top: 4px; color: #d9534f;">00:30</div>
+                <div id="black-chances" style="font-size: 12px; color: #666; margin-top: 4px;">超时: 0/3 · 30秒</div>
+            </div>
+
+            <!-- 中间：当前行棋提示（动态显示当前执子方） -->
+            <div style="margin: 0 12px; text-align: center;">
+                    <div id="turnIndicator" style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                        <div id="turnBadge" class="turn-badge" style="border:6px solid #d9534f;">
+                            <div id="turnGrid" class="turn-grid">
+                                <div id="c1">黑</div>
+                                <div id="c2">方</div>
+                                <div id="c3">行</div>
+                                <div id="c4">棋</div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+            <!-- 右侧：白方 -->
+            <div style="text-align: center;">
+                <img src="picture.jpg" alt="白方" style="width: 40px; height: 40px; border-radius: 4px;">
+                <div style="font-size: 14px; font-weight: 500; margin-top: 4px;">木幼希5310</div>
+                <div style="font-size: 12px; color: #666;">18级</div>
+                <div id="white-time" style="background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; font-size: 14px; font-weight: bold; margin-top: 4px; color: #007bff;">00:30</div>
+                <div id="white-chances" style="font-size: 12px; color: #666; margin-top: 4px;">超时: 0/3 · 30秒</div>
+            </div>
+        </div>
+
+        <!-- 原有的评估区 -->
+        <div id="evaluation" style="background: #fff; padding: 12px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px;">
+            全局评估：-
+        </div>
+
+        
+
+        <!-- AI 解说区 -->
+        <div class="sidebar-section" style="border-top: 3px solid #007bff;">
+            <h3>🤖 实时解说</h3>
+            <div id="agent-loading" style="display:none; color: #666; font-size: 12px; margin-bottom: 5px;">
+                Agent 正在思考局面...
+            </div>
+            <div id="agent-output" style="font-size: 13px; line-height: 1.6; color: #333;">
+            解说内容将在这里展示 
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="go.js"></script>
+</body>
+</html>
